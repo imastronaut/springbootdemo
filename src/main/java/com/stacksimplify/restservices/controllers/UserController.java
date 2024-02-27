@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,10 +23,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.stacksimplify.restservices.entities.User;
 import com.stacksimplify.restservices.exceptions.UserExistsException;
+import com.stacksimplify.restservices.exceptions.UserNameNotFoundException;
 import com.stacksimplify.restservices.exceptions.UserNotFoundException;
 import com.stacksimplify.restservices.services.UserService;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+
 @RestController
+@Validated
 @RequestMapping(path = "/users", produces = "application/json")
 public class UserController {
 
@@ -43,7 +49,7 @@ public class UserController {
 
 	@PostMapping(consumes = "application/json")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<User> createUser(@RequestBody User user) {
+	public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
 		try {
 			User createdUser = userService.createUser(user);
 			
@@ -56,7 +62,7 @@ public class UserController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
+	public ResponseEntity<User> getUserById(@PathVariable("id") @Min(1) Long id) {
 		User user = null;
 		try {
 			user = userService.getUserById(id);
@@ -92,12 +98,14 @@ public class UserController {
 	}
 	
 	@GetMapping("/username/{username}")
-	public ResponseEntity<User> getByUsername(@PathVariable("username") String username){
+	public User getByUsername(@PathVariable("username") String username) throws UserNameNotFoundException{
 		Optional<User> user = userService.getUserByUsername(username);
-		if(user.isPresent()) {
-			return new ResponseEntity<>(user.get(),HttpStatus.OK);
+		if(user.isEmpty()) {
+			throw new UserNameNotFoundException("user by username : "+username+" doesn't exist");
 		}
-		return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		return user.get();
+		
+		
 	}
 	
 }
