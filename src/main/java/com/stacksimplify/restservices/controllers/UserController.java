@@ -3,7 +3,9 @@ package com.stacksimplify.restservices.controllers;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,8 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.stacksimplify.restservices.entities.User;
+import com.stacksimplify.restservices.exceptions.UserExistsException;
+import com.stacksimplify.restservices.exceptions.UserNotFoundException;
 import com.stacksimplify.restservices.services.UserService;
 
 @RestController
@@ -37,17 +43,30 @@ public class UserController {
 
 	@PostMapping(consumes = "application/json")
 	@ResponseStatus(HttpStatus.CREATED)
-	public User createUser(@RequestBody User user) {
-		return userService.createUser(user);
+	public ResponseEntity<User> createUser(@RequestBody User user) {
+		try {
+			User createdUser = userService.createUser(user);
+			
+			return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+			
+		} catch (UserExistsException e) {
+			// TODO Auto-generated catch block
+			throw new ResponseStatusException(HttpStatus.CONFLICT,e.getMessage());
+		}
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
-		Optional<User> user = userService.getUserById(id);
-		if (user.isPresent()) {
-			return new ResponseEntity<>(user.get(), HttpStatus.OK);
+		User user = null;
+		try {
+			user = userService.getUserById(id);
+		} catch (UserNotFoundException e) {
+			// TODO Auto-generated catch block
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,e.getMessage());
 		}
-		return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		
+		return new ResponseEntity<>(user, HttpStatus.OK);
+		
 	}
 
 	
@@ -61,9 +80,15 @@ public class UserController {
 	
 	@PutMapping(path = "/{id}", consumes = "application/json")
 	public ResponseEntity<User> updateUserById(@PathVariable("id") Long id, @RequestBody User user){
-		user.setId(id);
-		User result = userService.updateUser(user);
-		return new ResponseEntity<>(result,HttpStatus.CREATED);	
+		User result = null;
+		try {
+			result = userService.updateUser(id, user);
+				
+		}catch(UserNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,e.getMessage());
+		}
+		return new ResponseEntity<>(result,HttpStatus.CREATED);
+	
 	}
 	
 	@GetMapping("/username/{username}")
