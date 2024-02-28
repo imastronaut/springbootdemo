@@ -2,6 +2,8 @@ package com.stacksimplify.restservices.entities;
 
 import java.util.List;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @Table(name = "`user`")
 @RequiredArgsConstructor
-public class User {
+public class User extends RepresentationModel<User>{
 	
 	@Id
 	@GeneratedValue

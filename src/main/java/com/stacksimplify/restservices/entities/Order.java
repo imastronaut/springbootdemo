@@ -1,5 +1,7 @@
 package com.stacksimplify.restservices.entities;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
@@ -15,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @Table(name = "orders")
 @Data
 @RequiredArgsConstructor
-public class Order {
+public class Order extends RepresentationModel<Order>{
 	
 	@Id
 	@GeneratedValue
