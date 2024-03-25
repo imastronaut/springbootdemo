@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.hateoas.RepresentationModel;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -24,8 +25,9 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @Data
 @Table(name = "`user`")
-@JsonIgnoreProperties({"firstname", "lastname"})
+//@JsonIgnoreProperties({"firstname", "lastname"}) -- Static Filtering JSON Ignore
 @RequiredArgsConstructor
+@JsonFilter(value = "userFilter")
 public class User extends RepresentationModel<User>{
 	
 	@Id
@@ -47,7 +49,7 @@ public class User extends RepresentationModel<User>{
 	private String role;
 	
 	@Column(name = "ssn", length = 50, nullable = false, unique = true)
-	@JsonIgnore
+//	@JsonIgnore    Static Filtering JSONIgnore
 	private String ssn;
 	
 	@OneToMany(mappedBy = "user")
