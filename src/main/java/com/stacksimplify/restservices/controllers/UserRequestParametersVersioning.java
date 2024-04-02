@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.stacksimplify.restservices.dtos.UserDto;
+import com.stacksimplify.restservices.dtos.UserDtoV1;
+import com.stacksimplify.restservices.dtos.UserDtoV2;
 import com.stacksimplify.restservices.entities.User;
 import com.stacksimplify.restservices.exceptions.UserNotFoundException;
 import com.stacksimplify.restservices.services.UserService;
@@ -18,22 +19,18 @@ import com.stacksimplify.restservices.services.UserService;
 import jakarta.validation.constraints.Min;
 
 @RestController
-@RequestMapping("/modelmapper/users")
-public class ModelMapperController {
+@RequestMapping("versioning/params/users")
+public class UserRequestParametersVersioning {
+	
+	@Autowired
+	private  ModelMapper mapper;
 	
 	@Autowired
 	private UserService userService;
 	
-	@Autowired
-	private ModelMapper modelMapper;
 	
-	public ModelMapperController(UserService userService){
-		this.userService = userService;
-	}
-	
-	
-	@GetMapping("/{id}")
-	public ResponseEntity<UserDto> getUserById(@PathVariable("id") @Min(1) Long id) {
+	@GetMapping(value = "{id}", params = "version=1")
+	public ResponseEntity<UserDtoV1> getUserById(@PathVariable("id") @Min(1) Long id) {
 		User user = null;
 		try {
 			user = userService.getUserById(id);
@@ -42,9 +39,27 @@ public class ModelMapperController {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,e.getMessage());
 		}
 		
-		UserDto userDto = modelMapper.map(user, UserDto.class);
-		
+		UserDtoV1 userDto = mapper.map(user, UserDtoV1.class);
+	
 		return new ResponseEntity<>(userDto, HttpStatus.OK);
 		
 	}
+	
+	@GetMapping( value = "{id}", params = "version=2")
+	public ResponseEntity<UserDtoV2> getUserById2(@PathVariable("id") @Min(1) Long id) {
+		User user = null;
+		try {
+			user = userService.getUserById(id);
+		} catch (UserNotFoundException e) {
+			// TODO Auto-generated catch block
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,e.getMessage());
+		}
+		
+		UserDtoV2 userDto = mapper.map(user, UserDtoV2.class);
+	
+		return new ResponseEntity<>(userDto, HttpStatus.OK);
+		
+	}
+	
+	
 }
