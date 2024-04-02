@@ -32,7 +32,7 @@ import jakarta.validation.constraints.Min;
 
 @RestController
 @Validated
-@RequestMapping(path = "/users", produces = "application/json")
+@RequestMapping(path = "/users")
 public class UserController {
 
 	private UserService userService;
@@ -47,7 +47,8 @@ public class UserController {
 		return userService.getAllUsers();
 	}
 
-	@PostMapping(consumes = "application/json")
+//	@PostMapping(consumes = "application/json")
+	@PostMapping(consumes = "application/xml")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
 		try {
