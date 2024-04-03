@@ -30,6 +30,7 @@ import jakarta.validation.constraints.Min;
 public class UserMappingJacksonController {
 	
 	
+	@Autowired
 	private UserService userService;
 	
 	public UserMappingJacksonController(UserService userService) {

@@ -3,9 +3,11 @@ package com.stacksimplify.restservices.controllers;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -27,14 +29,24 @@ import com.stacksimplify.restservices.exceptions.UserNameNotFoundException;
 import com.stacksimplify.restservices.exceptions.UserNotFoundException;
 import com.stacksimplify.restservices.services.UserService;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
 @RestController
 @Validated
-@RequestMapping(path = "/users")
+@RequestMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+@OpenAPIDefinition(info = @Info(title = "Stacksimplify user management service", version = "1.0", description = "Your API document description"))
+@Tag(name = "UserController", description = "Controller for APIs related to managing items")
 public class UserController {
 
+	@Autowired
 	private UserService userService;
 
 	public UserController(UserService userService) {
@@ -43,7 +55,12 @@ public class UserController {
 
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
-	public List<User> getAllUsers() {
+	@Operation(summary = "gets all users", description = "Geta list of all users")
+	@ApiResponses(value= {
+			@ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "500", description = "Internal server error")
+	})
+	public List<User> getAllUsers() {;
 		return userService.getAllUsers();
 	}
 
@@ -63,7 +80,7 @@ public class UserController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<User> getUserById(@PathVariable("id") @Min(1) Long id) {
+	public ResponseEntity<User> getUserById(@Parameter(description = "user id for new user")@PathVariable("id") @Min(1) Long id) {
 		User user = null;
 		try {
 			user = userService.getUserById(id);

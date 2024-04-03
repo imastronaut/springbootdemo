@@ -1,4 +1,7 @@
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy : ANT_PATH_MATCHER
   jpa:
     show-sql: true
   h2:
@@ -9,3 +12,6 @@ spring:
 server:
   error:
     include-stacktrace: never
+  mvc:
+    cors:
+      allow-credentials: false
